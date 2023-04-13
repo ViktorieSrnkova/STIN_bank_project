@@ -1,25 +1,34 @@
-import { Button, Typography, Divider, Form, Input, notification, Card } from 'antd';
-import { useRegisterUser } from 'hooks/mutation/useRegisterUser';
-import { useLoginUser } from 'hooks/mutation/useLoginUser';
+import { Button, Divider, Form, Input, notification, Card } from 'antd';
 import { Link } from 'react-router-dom';
-import useApp from 'hooks/useApp';
 import { useState } from 'react';
+import { gql, useMutation } from '@apollo/client';
+import { MutationCreateUserArgs } from 'types/gql';
 
-const { Link: LinkAnt } = Typography;
+const MUTATION_CREATE_USER = gql`
+	mutation createUser($email: String!, $password: String!) {
+		createUser(email: $email, password: $password)
+	}
+`;
+
 const RegisterPage: React.FC = () => {
 	const [loading, setLoading] = useState(false);
 	const [api, contextHolder] = notification.useNotification();
-	const registerUser = useRegisterUser();
-	const loginUser = useLoginUser();
-	const { setUserJWT } = useApp();
+	const [createUser] = useMutation<{ createUser: boolean }, MutationCreateUserArgs>(MUTATION_CREATE_USER);
 
 	const onFinish = async (values: { email: string; password: string }): Promise<void> => {
 		try {
 			setLoading(true);
-			await registerUser(values.email, values.password);
-			const token = await loginUser(values.email, values.password);
-			setUserJWT(token);
-		} catch (e) {
+			const response = await createUser({ variables: { email: values.email, password: values.password } });
+			if (response.data?.createUser) {
+				notification.success({
+					message: 'Success',
+				});
+			} else {
+				notification.error({
+					message: 'Error',
+				});
+			}
+		} finally {
 			setLoading(false);
 		}
 	};

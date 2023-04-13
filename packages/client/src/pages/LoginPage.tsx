@@ -1,26 +1,62 @@
-import { Button, Typography, Divider, Form, Input, notification, Card } from 'antd';
-import { useLoginUser } from 'hooks/mutation/useLoginUser';
+import { gql, useMutation } from '@apollo/client';
+import { Button, Divider, Form, Input, notification, Card } from 'antd';
 import useApp from 'hooks/useApp';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { MutationLoginUserAuthCodeArgs, MutationLoginUserAuthGenCodeArgs } from 'types/gql';
 
-const { Link: LinkAnt } = Typography;
+const MUTATION_LOGIN_USER_AUTH_GEN_CODE = gql`
+	mutation loginUserAuthGenCode($email: String!, $password: String!) {
+		loginUserAuthGenCode(email: $email, password: $password)
+	}
+`;
+
+const MUTATION_LOGIN_USER_AUTH_CODE = gql`
+	mutation loginUserAuthCode($email: String!, $password: String!, $code: String!) {
+		loginUserAuthCode(email: $email, password: $password, code: $code)
+	}
+`;
 
 const LoginPage: React.FC = () => {
+	const btnRef = useRef<'code' | 'login' | undefined>(undefined);
 	const { setUserJWT } = useApp();
 	const [loading, setLoading] = useState(false);
-	const loginUser = useLoginUser();
+	const [loginUserAuthGenCode] = useMutation<{ loginUserAuthGenCode: boolean }, MutationLoginUserAuthGenCodeArgs>(
+		MUTATION_LOGIN_USER_AUTH_GEN_CODE,
+	);
+	const [loginUser] = useMutation<{ loginUserAuthCode: string }, MutationLoginUserAuthCodeArgs>(
+		MUTATION_LOGIN_USER_AUTH_CODE,
+	);
+
 	const [api, contextHolder] = notification.useNotification();
 	const onFinish = async (values: any): Promise<void> => {
 		try {
 			setLoading(true);
-			const token = await loginUser(values.email, values.password);
-			setUserJWT(token);
+			if (btnRef.current === 'code') {
+				const r = await loginUserAuthGenCode({ variables: { email: values.email, password: values.password } });
+				if (!r.data?.loginUserAuthGenCode) {
+					notification.error({
+						message: 'Invalid password!',
+					});
+				}
+			} else {
+				const r = await loginUser({
+					variables: { email: values.email, password: values.password, code: values.code },
+				});
+				if (r.data?.loginUserAuthCode === '') {
+					notification.error({
+						message: 'Invalid 2pa code or password!',
+					});
+				} else {
+					setUserJWT(r.data?.loginUserAuthCode);
+				}
+			}
 		} catch (e) {
 			api.error({
 				message: `Login failed: ${e.toString()}`,
 				placement: 'topRight',
 			});
+		} finally {
 			setLoading(false);
 		}
 	};
@@ -61,17 +97,39 @@ const LoginPage: React.FC = () => {
 							<Input.Password placeholder="Password" />
 						</Form.Item>
 
+						<Form.Item name="code">
+							<Input.Password placeholder="Code" />
+						</Form.Item>
+
 						<Form.Item>
-							<Button loading={loading} style={{ width: '100%' }} type="primary" htmlType="submit">
+							<Button
+								loading={loading}
+								style={{ width: '100%' }}
+								type="primary"
+								htmlType="submit"
+								name="code"
+								onClick={() => {
+									btnRef.current = 'code';
+								}}
+							>
+								Send 2pa code
+							</Button>
+							<Divider />
+							<Button
+								loading={loading}
+								style={{ width: '100%' }}
+								type="primary"
+								htmlType="submit"
+								name="login"
+								onClick={() => {
+									btnRef.current = 'login';
+								}}
+							>
 								Login
 							</Button>
 						</Form.Item>
 					</Form>
 					<Divider />
-
-					<Button type="link">
-						<Link to="/reset-password">Reset password</Link>
-					</Button>
 					<Button type="link">
 						<Link to="/register">Register</Link>
 					</Button>

@@ -57,7 +57,7 @@ model UserAuthCode {
 	isUsed								Boolean				@default(false)
 
 	userId								String
-	user								User				@relation(fields: [userId], references: [id])
+	user								User				@relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Account {
@@ -71,8 +71,10 @@ model Account {
 	accountNumber						String			@unique
 
 	userId								String
-	user								User				@relation(fields: [userId], references: [id])
-	accountTransactions					Transaction[]
+	user								User				@relation(fields: [userId], references: [id], onDelete: Cascade)
+
+	sentTransactions					Transaction[]		@relation("fromAccount")
+	receivedTransactions				Transaction[]		@relation("toAccount")
 }
 
 model Transaction {
@@ -85,9 +87,12 @@ model Transaction {
 	amount								Float
 	transactionType						TransactionType
 
-	accountId							String
-	account								Account				@relation(fields: [accountId], references: [id])
+	fromAccountId						String
+	fromAccount							Account				@relation("fromAccount", fields: [fromAccountId], references: [id], onDelete: Cascade)
+
+	toAccountId							String
+	toAccount							Account				@relation("toAccount", fields: [toAccountId], references: [id], onDelete: Cascade)
 
 	userId								String
-	user								User				@relation(fields: [userId], references: [id])
+	user								User				@relation(fields: [userId], references: [id], onDelete: Cascade)
 }

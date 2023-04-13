@@ -61,16 +61,15 @@ export class UserService {
 			return '';
 		}
 
-		return this.authService.login({ id: dbUser.id });
-		// const dbAuthCode = await this.prismaService.userAuthCode.findFirst({
-		// 	where: { userId: dbUser.id, isUsed: false },
-		// });
+		const dbAuthCode = await this.prismaService.userAuthCode.findFirst({
+			where: { userId: dbUser.id, isUsed: false },
+		});
 
-		// if (code === dbAuthCode?.code) {
-		// 	await this.prismaService.userAuthCode.updateMany({ where: { userId: dbUser.id }, data: { isUsed: true } });
-		// 	return 'ok';
-		// }
+		if (code === dbAuthCode?.code) {
+			await this.prismaService.userAuthCode.updateMany({ where: { userId: dbUser.id }, data: { isUsed: true } });
+			return this.authService.login({ id: dbUser.id });
+		}
 
-		// return 'nok';
+		return 'nok';
 	}
 }

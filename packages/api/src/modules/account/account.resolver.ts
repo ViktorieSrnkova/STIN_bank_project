@@ -29,12 +29,15 @@ export class AccountResolver {
 
 	@Query(() => [AccountDto])
 	myAcounts(@CurrentUser() user: JWTUser): Promise<Omit<AccountDto, 'transactions' | 'balance'>[]> {
-		return this.prismaService.account.findMany({ where: { userId: user.id } });
+		return this.prismaService.account.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' } });
 	}
 
 	@ResolveField(() => [TransactionDto])
 	transactions(@Parent() parent: Omit<AccountDto, 'transactions' | 'balance'>): Promise<TransactionDto[]> {
-		return this.prismaService.transaction.findMany({ where: { accountId: parent.id } });
+		return this.prismaService.transaction.findMany({
+			where: { accountId: parent.id },
+			orderBy: { createdAt: 'desc' },
+		});
 	}
 
 	@ResolveField(() => Float)

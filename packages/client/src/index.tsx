@@ -3,16 +3,23 @@ import * as ReactDOMClient from 'react-dom/client';
 import { Card, ConfigProvider, Layout, Menu, MenuProps } from 'antd';
 import { useState } from 'react';
 import { CrownOutlined, GithubOutlined, RocketOutlined } from '@ant-design/icons';
-import Page from 'components/Page';
-import ListApplications from 'components/ListApplications';
+// import Page from 'components/Page';
+// import ListApplications from 'components/ListApplications';
 import { useLocation } from 'react-router';
 import RegisterPage from 'pages/RegisterPage';
-import Header from 'components/Header';
-import ErrorsModal from 'components/ErrorsModal';
-import ResetPasswordPage from 'pages/ResetPasswordPage';
+// import Header from 'components/Header';
+// import ErrorsModal from 'components/ErrorsModal';
+// import ResetPasswordPage from 'pages/ResetPasswordPage';
 import useApp from 'hooks/useApp';
-import AdminPage from 'pages/AdminPage';
-import SettingsPage from './components/SettingsPage';
+// import AdminPage from 'pages/AdminPage';
+import { ApolloProvider } from '@apollo/client';
+import { useApolloClient } from 'const/ApolloClient';
+// import SettingsPage from './components/SettingsPage';
+import ErrorsModal from 'components/ErrorsModal';
+import Header from 'components/Header';
+import Page from 'components/Page';
+import HomePage from 'pages/HomePage';
+import CreteTransactionPage from 'pages/CreteTransactionPage';
 import { AppProvider } from './contexts/AppContext';
 import LoginPage from './pages/LoginPage';
 
@@ -29,14 +36,18 @@ function getItem(label: React.ReactNode, to: string, icon?: React.ReactNode): Me
 	} as MenuItem;
 }
 
-export const PUBLIC_ROUTES = ['/register', '/reset-password', '/login'];
+export const PUBLIC_ROUTES = ['/register', '/login'];
 
 const AppLayout: React.FC = () => {
 	const { user } = useApp();
 	const [collapsed, setCollapsed] = useState(false);
 	const { pathname } = useLocation();
 
-	const MENU_ITEMS = [getItem('Applications', '/', <RocketOutlined />)];
+	const MENU_ITEMS = [
+		getItem('Accounts', '/', <RocketOutlined />),
+		getItem('Create transaction', '/create-transaction', <RocketOutlined />),
+	];
+
 	if (user && user.state === 'super-admin') {
 		MENU_ITEMS.push({
 			type: 'divider', // Must have
@@ -84,38 +95,27 @@ const AppLayout: React.FC = () => {
 };
 
 const AppNode: React.FC = () => {
-	const { user } = useApp();
+	const { userJWT } = useApp();
+	const apolloClient = useApolloClient(userJWT);
 	return (
-		<Routes>
-			<Route element={<AppLayout />}>
-				<Route
-					path="/"
-					element={
-						<Page breadcrumb={[{ title: 'Applications' }]}>
-							<Card>
-								<ListApplications />
-							</Card>
-						</Page>
-					}
-				/>
-				<Route path="/login" element={<LoginPage />} />
-				<Route path="/register" element={<RegisterPage />} />
-				<Route path="/reset-password/:code?" element={<ResetPasswordPage />} />
-				<Route path="/settings" element={<SettingsPage />} />
-				{user && user.state === 'super-admin' && <Route path="/admin" element={<AdminPage />} />}
-			</Route>
-		</Routes>
+		<ApolloProvider client={apolloClient}>
+			<Routes>
+				<Route element={<AppLayout />}>
+					<Route path="/" element={<HomePage />} />
+					<Route path="/create-transaction" element={<CreteTransactionPage />} />
+
+					<Route path="/login" element={<LoginPage />} />
+					<Route path="/register" element={<RegisterPage />} />
+				</Route>
+			</Routes>
+		</ApolloProvider>
 	);
 };
 
 const App: React.FC = () => (
 	<ConfigProvider
 		theme={{
-			token: {
-				// colorPrimary: '#E830AC',
-				// colorTextSecondary: '#E830AC',
-				// colorText: '#E830AC',
-			},
+			token: {},
 		}}
 	>
 		<BrowserRouter>
