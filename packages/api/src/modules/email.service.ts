@@ -1,17 +1,8 @@
-import { INestApplicationContext } from '@nestjs/common';
 import { ENV_EMAIL_PASSWORD, ENV_ENV } from 'const/env';
 import nodemailer from 'nodemailer';
-import { PrismaService } from './prisma/prisma.service';
 
 const NAME_EMAIL = 'Datinn';
 const BASE_EMAIL = 'noreply@datinn.io';
-
-export const EMAILS = {
-	EMAIL_LOGIN: {
-		body: (code: number) => `login code ${code}`,
-		subject: () => 'LOGIN CODE',
-	},
-};
 
 const transporter = nodemailer.createTransport({
 	host: 'smtp.seznam.cz',
