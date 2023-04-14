@@ -103,7 +103,6 @@ const AppNode: React.FC = () => {
 				<Route element={<AppLayout />}>
 					<Route path="/" element={<HomePage />} />
 					<Route path="/create-transaction" element={<CreteTransactionPage />} />
-
 					<Route path="/login" element={<LoginPage />} />
 					<Route path="/register" element={<RegisterPage />} />
 				</Route>
