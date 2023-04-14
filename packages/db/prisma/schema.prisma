@@ -6,9 +6,9 @@ generator client {
     previewFeatures = []
 }
 
-// generator dbml {
-//   provider = "prisma-dbml-generator"
-// }
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
 
 datasource db {
     provider = "postgresql"

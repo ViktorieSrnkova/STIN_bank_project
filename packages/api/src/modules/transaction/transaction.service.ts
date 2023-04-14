@@ -11,7 +11,7 @@ export class TransactionService {
 		transaction?: Omit<PrismaService, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'>,
 	): Promise<number> {
 		const connection = transaction ?? this.prismaService;
-		const [withdrawal, depoit, transfer] = await Promise.all([
+		const [withdrawal, depoit] = await Promise.all([
 			connection.transaction.aggregate({
 				_sum: {
 					amount: true,
@@ -47,6 +47,15 @@ export class TransactionService {
 		fromAccountNumber?: string,
 		toAccountNumber?: string,
 	): Promise<boolean> {
+		if (currency) {
+			const lastRate = await this.prismaService.exRate.findFirstOrThrow({
+				where: { currency },
+				orderBy: { createdAt: 'desc' },
+			});
+			// eslint-disable-next-line no-console
+			console.log(lastRate.exRate);
+		}
+
 		if (fromAccountNumber === toAccountNumber) {
 			throw new Error('Source and target account must be different');
 		}
@@ -124,15 +133,6 @@ export class TransactionService {
 						userId,
 					},
 				});
-				// await tx.transaction.create({
-				// 	data: {
-				// 		amount: amount * 1,
-				// 		transactionType: TransactionType.TRANSFER,
-				// 		fromAccountId: account1.id,
-				// 		toAccountId: account2.id,
-				// 		userId,
-				// 	},
-				// });
 			});
 
 			return true;

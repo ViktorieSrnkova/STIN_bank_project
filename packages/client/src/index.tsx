@@ -114,7 +114,9 @@ const AppNode: React.FC = () => {
 const App: React.FC = () => (
 	<ConfigProvider
 		theme={{
-			token: {},
+			token: {
+				colorPrimary: '#001685',
+			},
 		}}
 	>
 		<BrowserRouter>
