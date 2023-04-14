@@ -4,7 +4,7 @@ import { CurrentUser } from 'modules/auth/decorators/user.decorator';
 import { JwtAuthGuard } from 'modules/auth/jwt-auth.guard';
 import { JWTUser } from 'modules/auth/jwt.types';
 import { PrismaService } from 'modules/prisma/prisma.service';
-import { TransactionType } from '@prisma/client';
+import { Currency, TransactionType } from '@prisma/client';
 import { TransactionDto } from './transaction.dto';
 import { TransactionService } from './transaction.service';
 
@@ -18,7 +18,10 @@ export class TransactionResolver {
 
 	@Query(() => [TransactionDto])
 	myTransactions(@CurrentUser() user: JWTUser): Promise<TransactionDto[]> {
-		return this.prismaService.transaction.findMany({ where: { userId: user.id }, orderBy: { createdAt: 'desc' } });
+		return this.prismaService.transaction.findMany({
+			where: { userId: user.id },
+			orderBy: { createdAt: 'desc' },
+		}) as unknown as Promise<TransactionDto[]>;
 	}
 
 	@Mutation(() => Boolean)
@@ -27,9 +30,17 @@ export class TransactionResolver {
 		@Args('amount', { type: () => Float }) amount: number,
 		@Args('type', { type: () => TransactionType }) type: TransactionType,
 		@Args('fromAccountNumber', { nullable: true }) fromAccountNumber?: string,
+		@Args('currency', { type: () => Currency, nullable: true }) currency?: Currency,
 		@Args('toAccountNumber', { nullable: true }) toAccountNumber?: string,
 	): Promise<boolean> {
-		return this.transactionService.createTransaction(user.id, amount, type, fromAccountNumber, toAccountNumber);
+		return this.transactionService.createTransaction(
+			user.id,
+			amount,
+			type,
+			currency,
+			fromAccountNumber,
+			toAccountNumber,
+		);
 	}
 
 	@Query(() => [TransactionDto])
@@ -45,6 +56,6 @@ export class TransactionResolver {
 				],
 			},
 			orderBy: { createdAt: 'desc' },
-		});
+		}) as unknown as Promise<TransactionDto[]>;
 	}
 }

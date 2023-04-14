@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Currency, MutationCreateAccountArgs } from 'types/gql';
 import { firstUC } from 'utils/string';
 
-const CURRENCY_LIST = Object.values(Currency); // [Currency.Czk, Currency.Eur, Currency.Usd];
+const CURRENCY_LIST = Object.values(Currency);
 
 const MUTATION_CREATE_ACCOUNT = gql`
 	mutation createAccount($currency: Currency!) {
@@ -52,7 +52,10 @@ const CreateAccount: React.FC<Props> = ({ onCreate }) => {
 				autoComplete="off"
 			>
 				<Form.Item name="currency">
-					<Select style={{ width: '100%' }} options={CURRENCY_LIST.map(c => ({ value: c, label: c }))} />
+					<Select
+						style={{ width: '100%' }}
+						options={Object.values(Currency).map(c => ({ value: c, label: c }))}
+					/>
 				</Form.Item>
 				<Form.Item>
 					<Button loading={loading} style={{ width: '100%' }} type="primary" htmlType="submit">

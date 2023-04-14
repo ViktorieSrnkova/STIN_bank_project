@@ -24,7 +24,7 @@ const authenticate = (email: string, password: string): Promise<any> => {
 	return Promise.resolve(null);
 };
 
-const ENTITIES = ['User', 'UserAuthCode', 'Account', 'Transaction'];
+const ENTITIES = ['User', 'UserAuthCode', 'Account', 'Transaction', 'ExRate'];
 
 @Module({
 	imports: [

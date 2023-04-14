@@ -12,6 +12,6 @@ export class TransactionDto {
 	@Field(() => Float) amount!: number;
 	@Field(() => TransactionType) transactionType!: TransactionType;
 
-	@Field() fromAccountId!: string;
-	@Field() toAccountId!: string;
+	@Field({ nullable: true }) fromAccountId?: string;
+	@Field({ nullable: true }) toAccountId?: string;
 }

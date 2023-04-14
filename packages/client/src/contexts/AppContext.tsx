@@ -211,6 +211,11 @@ export const AppProvider: FC<UserProviderProps> = ({ children }) => {
 						type: 'PUSH_ERRORS',
 						payload: { errors },
 					}),
+				pushError: (error: Error): void =>
+					dispatch({
+						type: 'PUSH_ERRORS',
+						payload: { errors: [error] },
+					}),
 				popError: (id: string): void =>
 					dispatch({
 						type: 'POP_ERROR',

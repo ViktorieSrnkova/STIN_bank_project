@@ -44,6 +44,7 @@ export type MutationCreateAccountArgs = {
 
 export type MutationCreateTransactionArgs = {
 	amount: Scalars['Float'];
+	currency?: InputMaybe<Currency>;
 	fromAccountNumber?: InputMaybe<Scalars['String']>;
 	toAccountNumber?: InputMaybe<Scalars['String']>;
 	type: TransactionType;
@@ -80,9 +81,9 @@ export type TransactionDto = {
 	__typename?: 'TransactionDto';
 	amount: Scalars['Float'];
 	createdAt: Scalars['DateTime'];
-	fromAccountId: Scalars['String'];
+	fromAccountId?: Maybe<Scalars['String']>;
 	id: Scalars['String'];
-	toAccountId: Scalars['String'];
+	toAccountId?: Maybe<Scalars['String']>;
 	transactionType: TransactionType;
 };
 
